@@ -11,10 +11,42 @@ case "$REMOTE_ADDR" in
     *) echo '{"error":"Access denied"}'; exit 0 ;;
 esac
 
-REQ_USER=$(echo "$QUERY_STRING" | grep -o 'user=[^&]*' | cut -d= -f2)
-REQ_PASS=$(echo "$QUERY_STRING" | grep -o 'pass=[^&]*' | cut -d= -f2)
-ACTION=$(echo "$QUERY_STRING" | grep -o 'action=[^&]*' | cut -d= -f2)
-SWITCH_ID=$(echo "$QUERY_STRING" | grep -o 'switch=[^&]*' | cut -d= -f2)
+# Read POST body only (credentials must not travel in the URL)
+case "$CONTENT_LENGTH" in
+    ''|*[!0-9]*) LEN=0 ;;
+    *) LEN=$CONTENT_LENGTH; [ "$LEN" -gt 2048 ] && LEN=2048 ;;
+esac
+BODY=''
+[ "$LEN" -gt 0 ] && BODY=$(dd bs=1 count="$LEN" 2>/dev/null)
+
+# URL-decode a single field value (handles %XX and + → space)
+urldecode() {
+    printf '%b' "$(printf '%s' "$1" | sed 's/+/ /g; s/%\([0-9a-fA-F][0-9a-fA-F]\)/\\x\1/g')"
+}
+
+REQ_USER=$(urldecode "$(printf '%s' "$BODY" | grep -o 'user=[^&]*' | cut -d= -f2-)")
+REQ_PASS=$(urldecode "$(printf '%s' "$BODY" | grep -o 'pass=[^&]*' | cut -d= -f2-)")
+ACTION=$(printf '%s' "$BODY" | grep -o 'action=[^&]*' | cut -d= -f2-)
+SWITCH_ID=$(printf '%s' "$BODY" | grep -o 'switch=[^&]*' | cut -d= -f2-)
+
+# Per-IP brute-force protection: 5 failures triggers a 5-minute lockout
+LOCK_FILE="/tmp/vpntoggle_lk_$(printf '%s' "$REMOTE_ADDR" | tr -cd '[:alnum:]_')"
+LOCKOUT_MAX=5
+LOCKOUT_SECS=300
+if [ -f "$LOCK_FILE" ]; then
+    LOCK_COUNT=$(sed -n '1p' "$LOCK_FILE")
+    LOCK_TIME=$(sed -n '2p' "$LOCK_FILE")
+    NOW=$(date +%s)
+    if [ "${LOCK_COUNT:-0}" -ge "$LOCKOUT_MAX" ] && \
+       [ $(( NOW - ${LOCK_TIME:-0} )) -lt "$LOCKOUT_SECS" ]; then
+        echo '{"error":"Too many failed attempts. Try again later."}'
+        exit 0
+    fi
+    [ $(( NOW - ${LOCK_TIME:-0} )) -ge "$LOCKOUT_SECS" ] && rm -f "$LOCK_FILE"
+fi
+
+# JSON-escape a string value
+json_esc() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g; s/	/\\t/g'; }
 
 # Authenticate: loop through all user sections
 AUTH=0
@@ -33,9 +65,16 @@ while true; do
 done
 
 if [ "$AUTH" = "0" ]; then
+    NOW=$(date +%s)
+    COUNT=1
+    [ -f "$LOCK_FILE" ] && COUNT=$(( $(sed -n '1p' "$LOCK_FILE") + 1 ))
+    printf '%s\n%s\n' "$COUNT" "$NOW" > "$LOCK_FILE"
     echo '{"error":"Unauthorized"}'
     exit 0
 fi
+
+# Successful auth — clear any lockout for this IP
+rm -f "$LOCK_FILE"
 
 # list: return all switches with current routing state
 if [ "$ACTION" = "list" ]; then
@@ -51,7 +90,7 @@ if [ "$ACTION" = "list" ]; then
             WAN_IF=$(uci -q get "vpn_toggle.@switch[$i].wan_if")
             VPN_IF=$(uci -q get "vpn_toggle.@switch[$i].vpn_if")
             CURRENT_IF=$(uci -q get "pbr.$RULE.interface")
-            OUT="${OUT}${SEP}{\"id\":${i},\"name\":\"${DNAME}\",\"rule\":\"${RULE}\",\"current_if\":\"${CURRENT_IF}\",\"wan_if\":\"${WAN_IF}\",\"vpn_if\":\"${VPN_IF}\"}"
+            OUT="${OUT}${SEP}{\"id\":${i},\"name\":\"$(json_esc "$DNAME")\",\"rule\":\"$(json_esc "$RULE")\",\"current_if\":\"$(json_esc "$CURRENT_IF")\",\"wan_if\":\"$(json_esc "$WAN_IF")\",\"vpn_if\":\"$(json_esc "$VPN_IF")\"}"
             SEP=','
         fi
         i=$((i + 1))

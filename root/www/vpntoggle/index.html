@@ -133,10 +133,14 @@ document.getElementById('inp-pass').addEventListener('keydown', function(e) {
 });
 
 function api(params) {
-  var qs = Object.keys(params).map(function(k) {
+  var body = Object.keys(params).map(function(k) {
     return encodeURIComponent(k) + '=' + encodeURIComponent(params[k]);
   }).join('&');
-  return fetch('/cgi-bin/vpn-api?' + qs).then(function(r) { return r.json(); });
+  return fetch('/cgi-bin/vpn-api', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body
+  }).then(function(r) { return r.json(); });
 }
 
 function doLogin() {
