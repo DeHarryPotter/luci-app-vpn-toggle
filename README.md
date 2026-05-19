@@ -58,10 +58,10 @@ Download and install directly on your router:
 
 ```sh
 cd /tmp
-wget https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/latest/download/luci-app-vpn-toggle_1.0.10-1_all.ipk
+wget https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/latest/download/luci-app-vpn-toggle_1.0.11-1_all.ipk
 opkg update
 opkg install pbr
-opkg install /tmp/luci-app-vpn-toggle_1.0.10-1_all.ipk
+opkg install /tmp/luci-app-vpn-toggle_1.0.11-1_all.ipk
 ```
 
 Then clear the LuCI cache and reload:
@@ -93,6 +93,7 @@ Pre-built `.ipk` files for all versions are available on the [Releases page](htt
 
 | Version | Download |
 |---------|----------|
+| 1.0.11 *(latest)* | [luci-app-vpn-toggle_1.0.11-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.11/luci-app-vpn-toggle_1.0.11-1_all.ipk) |
 | 1.0.10  | [luci-app-vpn-toggle_1.0.10-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.10/luci-app-vpn-toggle_1.0.10-1_all.ipk) |
 
 ---
