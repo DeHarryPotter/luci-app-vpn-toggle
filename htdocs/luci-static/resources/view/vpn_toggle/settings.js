@@ -176,7 +176,8 @@ _cleanupFirewallForwarding: function(vpnIface, excludeSecName, subnet) {
 
 // Returns true if the IP already had a static lease (nothing created).
 // Returns false if we created the static lease (should be removed on switch delete).
-_ensureStaticLease: function(ip) {
+// suggestedName: fallback hostname if none found in DHCP leases (e.g. from device dropdown label).
+_ensureStaticLease: function(ip, suggestedName) {
   var self = this;
   if (!ip) return true;
   var alreadyStatic = false;
@@ -196,9 +197,11 @@ _ensureStaticLease: function(ip) {
     });
   }
   if (!mac) return true; // no MAC found – can't create reservation, treat as already static
+  if (!hostname && suggestedName) hostname = suggestedName;
   var ns = uci.add('dhcp', 'host');
   uci.set('dhcp', ns, 'ip', ip);
   uci.set('dhcp', ns, 'mac', mac);
+  uci.set('dhcp', ns, 'leasetime', 'infinite');
   if (hostname) uci.set('dhcp', ns, 'name', hostname);
   return false;
 },
@@ -511,7 +514,11 @@ _editSwitchInline: function(table, secName, row, selUser, container) {
             var oldMadeStatic = uci.get('vpn_toggle', secName, 'dhcp_made_static') || '0';
             if (cur.device && oldMadeStatic === '1') self._restoreStaticLease(cur.device);
             if (devSel.value) {
-              var ws = self._ensureStaticLease(devSel.value);
+              var devOpt2 = devSel.options[devSel.selectedIndex];
+              var devLabel2 = devOpt2 ? devOpt2.text : '';
+              var dashIdx2 = devLabel2.indexOf(' - ');
+              var devName2 = dashIdx2 > 0 ? devLabel2.substring(0, dashIdx2) : null;
+              var ws = self._ensureStaticLease(devSel.value, devName2);
               uci.set('vpn_toggle', secName, 'dhcp_made_static', ws ? '0' : '1');
             } else {
               uci.set('vpn_toggle', secName, 'dhcp_made_static', '0');
@@ -572,7 +579,11 @@ _addSwitchForm: function(container, selUser) {
         self._syncPbr(name, devSel.value||subSel.value, wanSel.value, ns);
         self._ensureFirewallForwarding(vpnSel.value, subSel.value);
         if (devSel.value) {
-          var wasStatic = self._ensureStaticLease(devSel.value);
+          var devOpt = devSel.options[devSel.selectedIndex];
+          var devLabel = devOpt ? devOpt.text : '';
+          var dashIdx = devLabel.indexOf(' - ');
+          var devName = dashIdx > 0 ? devLabel.substring(0, dashIdx) : null;
+          var wasStatic = self._ensureStaticLease(devSel.value, devName);
           uci.set('vpn_toggle', ns, 'dhcp_made_static', wasStatic ? '0' : '1');
         }
         self._save().then(function() {
