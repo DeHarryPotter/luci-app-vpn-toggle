@@ -174,6 +174,42 @@ _cleanupFirewallForwarding: function(vpnIface, excludeSecName, subnet) {
   toRemove.forEach(function(n) { uci.remove('firewall', n); });
 },
 
+// Returns true if the IP already had a static lease (nothing created).
+// Returns false if we created the static lease (should be removed on switch delete).
+_ensureStaticLease: function(ip) {
+  var self = this;
+  if (!ip) return true;
+  var alreadyStatic = false;
+  uci.sections('dhcp', 'host', function(h) { if (h.ip === ip) alreadyStatic = true; });
+  if (alreadyStatic) return true;
+  var mac = null, hostname = null;
+  var dhcpInfo = {};
+  (self._dhcp || '').trim().split(/\r?\n/).forEach(function(ln) {
+    var p = ln.trim().split(/\s+/);
+    if (p.length >= 4) dhcpInfo[p[2]] = { mac: p[1], name: p[3] !== '*' ? p[3] : '' };
+  });
+  if (dhcpInfo[ip]) { mac = dhcpInfo[ip].mac; hostname = dhcpInfo[ip].name || null; }
+  if (!mac) {
+    (self._arp || '').trim().split(/\r?\n/).slice(1).forEach(function(ln) {
+      var p = ln.trim().split(/\s+/);
+      if (p.length >= 4 && p[0] === ip && p[3] !== '00:00:00:00:00:00') mac = p[3];
+    });
+  }
+  if (!mac) return true; // no MAC found – can't create reservation, treat as already static
+  var ns = uci.add('dhcp', 'host');
+  uci.set('dhcp', ns, 'ip', ip);
+  uci.set('dhcp', ns, 'mac', mac);
+  if (hostname) uci.set('dhcp', ns, 'name', hostname);
+  return false;
+},
+
+_restoreStaticLease: function(ip) {
+  if (!ip) return;
+  var toRemove = [];
+  uci.sections('dhcp', 'host', function(h) { if (h.ip === ip) toRemove.push(h['.name']); });
+  toRemove.forEach(function(n) { uci.remove('dhcp', n); });
+},
+
 _deviceLabel: function(ip) {
   if (!ip) return '';
   var label = ip;
@@ -415,6 +451,8 @@ _switchRow: function(table, sw, selUser, container) {
       var pbrRule = uci.get('vpn_toggle', sw['.name'], 'pbr_rule') || '';
       if (pbrRule) uci.remove('pbr', pbrRule);
       self._cleanupFirewallForwarding(sw.vpn_if, sw['.name'], sw.target_subnet);
+      if (sw.target_device && uci.get('vpn_toggle', sw['.name'], 'dhcp_made_static') === '1')
+        self._restoreStaticLease(sw.target_device);
       uci.remove('vpn_toggle', sw['.name']);
       self._save().then(function() {
         self._renderSwitches(container, selUser);
@@ -469,6 +507,16 @@ _editSwitchInline: function(table, secName, row, selUser, container) {
           self._syncPbr(nIn.value.trim(), devSel.value||subSel.value, wanSel.value, secName);
           self._ensureFirewallForwarding(vpnSel.value, subSel.value);
           if (cur.vpn !== vpnSel.value || cur.subnet !== subSel.value) self._cleanupFirewallForwarding(cur.vpn, secName, cur.subnet);
+          if (cur.device !== devSel.value) {
+            var oldMadeStatic = uci.get('vpn_toggle', secName, 'dhcp_made_static') || '0';
+            if (cur.device && oldMadeStatic === '1') self._restoreStaticLease(cur.device);
+            if (devSel.value) {
+              var ws = self._ensureStaticLease(devSel.value);
+              uci.set('vpn_toggle', secName, 'dhcp_made_static', ws ? '0' : '1');
+            } else {
+              uci.set('vpn_toggle', secName, 'dhcp_made_static', '0');
+            }
+          }
           self._save().then(function() {
             editRow.parentNode.removeChild(editRow);
             self._renderSwitches(container, selUser);
@@ -523,6 +571,10 @@ _addSwitchForm: function(container, selUser) {
         uci.set('vpn_toggle', ns, 'enabled', '1');
         self._syncPbr(name, devSel.value||subSel.value, wanSel.value, ns);
         self._ensureFirewallForwarding(vpnSel.value, subSel.value);
+        if (devSel.value) {
+          var wasStatic = self._ensureStaticLease(devSel.value);
+          uci.set('vpn_toggle', ns, 'dhcp_made_static', wasStatic ? '0' : '1');
+        }
         self._save().then(function() {
           self._renderSwitches(container, selUser);
         }).catch(function() { adding = false; });
