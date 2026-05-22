@@ -104,15 +104,22 @@ make package/luci-app-vpn-toggle/compile V=s
 
 ## Releases
 
-Pre-built `.ipk` files for all versions are available on the [Releases page](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases).
+Pre-built `.ipk` files are available on the [Releases page](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases).
 
 | Version | Download |
 |---------|----------|
-| 2.0.0 *(latest)* | [luci-app-vpn-toggle_2.0.0-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v2.0.0/luci-app-vpn-toggle_2.0.0-1_all.ipk) |
-| 1.0.13  | [luci-app-vpn-toggle_1.0.13-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.13/luci-app-vpn-toggle_1.0.13-1_all.ipk) |
-| 1.0.12  | [luci-app-vpn-toggle_1.0.12-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.12/luci-app-vpn-toggle_1.0.12-1_all.ipk) |
-| 1.0.11  | [luci-app-vpn-toggle_1.0.11-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.11/luci-app-vpn-toggle_1.0.11-1_all.ipk) |
-| 1.0.10  | [luci-app-vpn-toggle_1.0.10-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.10/luci-app-vpn-toggle_1.0.10-1_all.ipk) |
+| 2.0.0-1 *(latest)* | [luci-app-vpn-toggle_2.0.0-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v2.0.0/luci-app-vpn-toggle_2.0.0-1_all.ipk) |
+
+---
+
+### Legacy — v1.0.13-1
+
+> **⚠ Not recommended for new installs.**
+> This release is not compliant with OpenWrt packaging standards. It directly modifies files under `/etc/passwd` and `/etc/shadow` outside of OpenWrt's user management, and uses a CGI-based standalone toggle page (`/vpntoggle/`) instead of the native LuCI framework. It is preserved here for reference only.
+
+| Version | Download |
+|---------|----------|
+| 1.0.13-1 | [luci-app-vpn-toggle_1.0.13-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.13/luci-app-vpn-toggle_1.0.13-1_all.ipk) |
 
 ---
 
