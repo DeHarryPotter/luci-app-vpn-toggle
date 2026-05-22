@@ -109,13 +109,10 @@ Pre-built `.ipk` files for all versions are available on the [Releases page](htt
 | Version | Download |
 |---------|----------|
 | 2.0.0 *(latest)* | [luci-app-vpn-toggle_2.0.0-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v2.0.0/luci-app-vpn-toggle_2.0.0-1_all.ipk) |
-| 1.0.18  | [luci-app-vpn-toggle_1.0.18-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.18/luci-app-vpn-toggle_1.0.18-1_all.ipk) |
-| 1.0.16  | [luci-app-vpn-toggle_1.0.16-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.16/luci-app-vpn-toggle_1.0.16-1_all.ipk) |
-| 1.0.15  | [luci-app-vpn-toggle_1.0.15-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.15/luci-app-vpn-toggle_1.0.15-1_all.ipk) |
-| 1.0.14  | [luci-app-vpn-toggle_1.0.14-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.14/luci-app-vpn-toggle_1.0.14-1_all.ipk) |
 | 1.0.13  | [luci-app-vpn-toggle_1.0.13-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.13/luci-app-vpn-toggle_1.0.13-1_all.ipk) |
 | 1.0.12  | [luci-app-vpn-toggle_1.0.12-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.12/luci-app-vpn-toggle_1.0.12-1_all.ipk) |
 | 1.0.11  | [luci-app-vpn-toggle_1.0.11-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.11/luci-app-vpn-toggle_1.0.11-1_all.ipk) |
+| 1.0.10  | [luci-app-vpn-toggle_1.0.10-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.10/luci-app-vpn-toggle_1.0.10-1_all.ipk) |
 
 ---
 
