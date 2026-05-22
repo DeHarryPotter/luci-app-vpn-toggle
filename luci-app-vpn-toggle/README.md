@@ -85,6 +85,7 @@ The app appears under **Services → VPN Toggle** in LuCI.
 
 ## Troubleshooting
 
+- **`ERR_INCOMPLETE_CHUNKED_ENCODING` after install via LuCI Software page**: This is normal. When opkg installs a LuCI package it modifies menu and ACL files mid-response, causing the browser to see a broken HTTP stream. The install succeeds — just log out and back in.
 - **PBR Rules not applying**: Ensure the `pbr` service is enabled and running (`/etc/init.d/pbr enabled && /etc/init.d/pbr start`).
 - **User cannot see Toggle page**: Verify the user has been added in the **Settings** page and has the correct `rpcd` permissions.
 - **DNS Leaks**: If using a VPN, ensure your PBR configuration includes DNS hijacking or specific DNS routing rules.
