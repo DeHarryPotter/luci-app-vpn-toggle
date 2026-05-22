@@ -5,7 +5,7 @@ LUCI_DEPENDS:=+pbr +luci-base
 LUCI_PKGARCH:=all
 
 PKG_NAME:=luci-app-vpn-toggle
-PKG_VERSION:=2.0.0
+PKG_VERSION:=2.1.0
 PKG_RELEASE:=1
 PKG_MAINTAINER:=Nico Groot <nicopen1@live.nl>
 PKG_LICENSE:=Apache-2.0

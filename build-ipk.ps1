@@ -3,7 +3,7 @@
 # Pure PowerShell + inline C# - no external tools required.
 
 $PKG_NAME    = "luci-app-vpn-toggle"
-$PKG_VERSION = "2.0.0"
+$PKG_VERSION = "2.1.0"
 $PKG_RELEASE = "1"
 $PKG_ARCH    = "all"
 $OUTPUT      = "$PSScriptRoot\${PKG_NAME}_${PKG_VERSION}-${PKG_RELEASE}_${PKG_ARCH}.ipk"
