@@ -65,10 +65,10 @@ Download and install directly on your router:
 
 ```sh
 cd /tmp
-wget https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/latest/download/luci-app-vpn-toggle_1.0.13-1_all.ipk
+wget https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/latest/download/luci-app-vpn-toggle_2.0.0-1_all.ipk
 opkg update
 opkg install pbr
-opkg install /tmp/luci-app-vpn-toggle_1.0.13-1_all.ipk
+opkg install /tmp/luci-app-vpn-toggle_2.0.0-1_all.ipk
 ```
 
 Then clear the LuCI cache and reload:
@@ -80,6 +80,14 @@ rm -rf /tmp/luci-indexcache* /tmp/luci-modulecache*
 ```
 
 The app appears under **Services → VPN Toggle** in LuCI.
+
+---
+
+## Troubleshooting
+
+- **PBR Rules not applying**: Ensure the `pbr` service is enabled and running (`/etc/init.d/pbr enabled && /etc/init.d/pbr start`).
+- **User cannot see Toggle page**: Verify the user has been added in the **Settings** page and has the correct `rpcd` permissions.
+- **DNS Leaks**: If using a VPN, ensure your PBR configuration includes DNS hijacking or specific DNS routing rules.
 
 ### Option B — Build from source
 
@@ -100,7 +108,12 @@ Pre-built `.ipk` files for all versions are available on the [Releases page](htt
 
 | Version | Download |
 |---------|----------|
-| 1.0.13 *(latest)* | [luci-app-vpn-toggle_1.0.13-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.13/luci-app-vpn-toggle_1.0.13-1_all.ipk) |
+| 2.0.0 *(latest)* | [luci-app-vpn-toggle_2.0.0-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v2.0.0/luci-app-vpn-toggle_2.0.0-1_all.ipk) |
+| 1.0.18  | [luci-app-vpn-toggle_1.0.18-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.18/luci-app-vpn-toggle_1.0.18-1_all.ipk) |
+| 1.0.16  | [luci-app-vpn-toggle_1.0.16-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.16/luci-app-vpn-toggle_1.0.16-1_all.ipk) |
+| 1.0.15  | [luci-app-vpn-toggle_1.0.15-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.15/luci-app-vpn-toggle_1.0.15-1_all.ipk) |
+| 1.0.14  | [luci-app-vpn-toggle_1.0.14-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.14/luci-app-vpn-toggle_1.0.14-1_all.ipk) |
+| 1.0.13  | [luci-app-vpn-toggle_1.0.13-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.13/luci-app-vpn-toggle_1.0.13-1_all.ipk) |
 | 1.0.12  | [luci-app-vpn-toggle_1.0.12-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.12/luci-app-vpn-toggle_1.0.12-1_all.ipk) |
 | 1.0.11  | [luci-app-vpn-toggle_1.0.11-1_all.ipk](https://github.com/DeHarryPotter/luci-app-vpn-toggle/releases/download/v1.0.11/luci-app-vpn-toggle_1.0.11-1_all.ipk) |
 

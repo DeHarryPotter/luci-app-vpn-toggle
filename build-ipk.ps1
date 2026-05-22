@@ -3,7 +3,7 @@
 # Pure PowerShell + inline C# - no external tools required.
 
 $PKG_NAME    = "luci-app-vpn-toggle"
-$PKG_VERSION = "1.0.13"
+$PKG_VERSION = "2.0.0"
 $PKG_RELEASE = "1"
 $PKG_ARCH    = "all"
 $OUTPUT      = "$PSScriptRoot\${PKG_NAME}_${PKG_VERSION}-${PKG_RELEASE}_${PKG_ARCH}.ipk"
@@ -88,7 +88,7 @@ function Write-Unix($path, $text) {
     [System.IO.File]::WriteAllBytes($path, $bytes)
 }
 
-$EXEC_NAMES = @('vpn-api', 'postinst', 'preinst', 'postrm', 'prerm')
+$EXEC_NAMES = @('user-manager', 'luci-app-vpn-toggle', 'postinst', 'preinst', 'postrm', 'prerm')
 
 function Build-ControlTarGz($srcDir, $outPath) {
     $tar = New-Object TarGzBuilder($outPath)
@@ -127,19 +127,20 @@ function Build-IpkTarGz($pkgDir, $outPath) {
 New-Dir "$TMPDIR\pkg"
 New-Dir "$TMPDIR\ctrl"
 New-Dir "$TMPDIR\data\www\luci-static\resources\view\vpn_toggle"
-New-Dir "$TMPDIR\data\www\cgi-bin"
-New-Dir "$TMPDIR\data\www\vpntoggle"
 New-Dir "$TMPDIR\data\etc\config"
+New-Dir "$TMPDIR\data\etc\uci-defaults"
 New-Dir "$TMPDIR\data\usr\share\luci\menu.d"
 New-Dir "$TMPDIR\data\usr\share\rpcd\acl.d"
+New-Dir "$TMPDIR\data\usr\share\vpn-toggle"
 
 # ── copy source files ─────────────────────────────────────────────────────────
 Copy-Item -Recurse "$ROOT\htdocs\luci-static\*"                                   "$TMPDIR\data\www\luci-static\"       -Force
 Copy-Item          "$ROOT\root\etc\config\vpn_toggle"                             "$TMPDIR\data\etc\config\"            -Force
 Copy-Item          "$ROOT\root\usr\share\luci\menu.d\luci-app-vpn-toggle.json"    "$TMPDIR\data\usr\share\luci\menu.d\" -Force
-Copy-Item          "$ROOT\root\usr\share\rpcd\acl.d\luci-app-vpn-toggle.json"     "$TMPDIR\data\usr\share\rpcd\acl.d\"  -Force
-Copy-Item          "$ROOT\root\www\cgi-bin\vpn-api"                               "$TMPDIR\data\www\cgi-bin\"           -Force
-Copy-Item          "$ROOT\root\www\vpntoggle\index.html"                          "$TMPDIR\data\www\vpntoggle\"         -Force
+Copy-Item          "$ROOT\root\usr\share\rpcd\acl.d\luci-app-vpn-toggle.json"         "$TMPDIR\data\usr\share\rpcd\acl.d\"  -Force
+Copy-Item          "$ROOT\root\usr\share\rpcd\acl.d\luci-app-vpn-toggle-admin.json"   "$TMPDIR\data\usr\share\rpcd\acl.d\"  -Force
+Copy-Item          "$ROOT\root\usr\share\vpn-toggle\user-manager"                      "$TMPDIR\data\usr\share\vpn-toggle\" -Force
+Copy-Item          "$ROOT\root\etc\uci-defaults\luci-app-vpn-toggle"                   "$TMPDIR\data\etc\uci-defaults\"      -Force
 
 # ── control files ─────────────────────────────────────────────────────────────
 Write-Unix "$TMPDIR\ctrl\control" @"
@@ -170,6 +171,12 @@ Remove-Item -Recurse -Force $TMPDIR
 Write-Host ""
 Write-Host "Built: $OUTPUT"
 Write-Host ""
-Write-Host "Install on router:"
-Write-Host "  scp -O `"$OUTPUT`" root@192.168.44.1:/tmp/luci-app-vpn-toggle.ipk"
-Write-Host "  ssh root@192.168.44.1 'opkg update && opkg install pbr; opkg install /tmp/luci-app-vpn-toggle.ipk'"
+Write-Host "Deployment examples for 192.168.44.1"
+Write-Host "------------------------------------------------------"
+Write-Host "Option 1: Using standard SSH/SCP"
+Write-Host "  scp -O `"$OUTPUT`" root@192.168.44.1:/tmp/"
+Write-Host "  ssh root@192.168.44.1 'opkg update && opkg install pbr && opkg install /tmp/$($PKG_NAME)_$($PKG_VERSION)-1_all.ipk'"
+Write-Host ""
+Write-Host "Option 2: Using Plink/PSCP"
+Write-Host "  pscp `"$OUTPUT`" root@192.168.44.1:/tmp/"
+Write-Host "  plink -ssh root@192.168.44.1 \"opkg update && opkg install pbr && opkg install /tmp/$($PKG_NAME)_$($PKG_VERSION)-1_all.ipk\""

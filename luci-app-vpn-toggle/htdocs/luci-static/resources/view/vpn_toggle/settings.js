@@ -40,9 +40,11 @@ _ifaces: function() {
 _subnets: function() {
   var r = [{ v:'', l:'-- select subnet --' }];
   uci.sections('network', 'interface', function(s) {
-    if (s.ipaddr && s.netmask) {
-      var n = s.ipaddr.replace(/\.\d+$/, '.0/24');
-      r.push({ v:n, l:s['.name'].toUpperCase()+' ('+n+')' });
+    var ip = s.ipaddr || (Array.isArray(s.ipaddrs) && s.ipaddrs[0]);
+    if (ip && ip.indexOf('/') === -1) { // Basic IPv4 check
+      var n = ip.replace(/\.\d+$/, '.0/24');
+      var name = s['.name'] || 'unknown';
+      r.push({ v:n, l:name.toUpperCase()+' ('+n+')' });
     }
   });
   return r;
@@ -122,7 +124,8 @@ _srcZoneForSubnet: function(subnet) {
   if (!subnet) return 'lan';
   var ifaceName = null;
   uci.sections('network', 'interface', function(s) {
-    if (s.ipaddr && s.ipaddr.replace(/\.\d+$/, '.0/24') === subnet) ifaceName = s['.name'];
+    var ip = s.ipaddr || (Array.isArray(s.ipaddrs) && s.ipaddrs[0]);
+    if (ip && ip.replace(/\.\d+$/, '.0/24') === subnet) ifaceName = s['.name'];
   });
   if (!ifaceName) return 'lan';
   var zoneName = 'lan';
@@ -239,10 +242,8 @@ _rpcdUsers: function() {
   return r;
 },
 
-_sel: function(opts, cur, size) {
-  var attrs = { class:'cbi-input-select', style:'width:100%' };
-  if (size) attrs.size = size;
-  var s = E('select', attrs);
+_sel: function(opts, cur) {
+  var s = E('select', { class:'cbi-input-select', style:'width:100%' });
   opts.forEach(function(o) {
     var val = o.v !== undefined ? o.v : o;
     var lbl = o.l !== undefined ? o.l : o;
@@ -395,7 +396,7 @@ _addRpcdUserForm: function(section, table) {
         return;
       }
       adding = true;
-      errEl.textContent = 'Creating\u2026';
+      ui.showModal(null, E('p', { class: 'spinning' }, 'Creating system user and setting permissions...'));
       // Step 1: create unix user entry (passwd + locked shadow row)
       fs.exec('/usr/share/vpn-toggle/user-manager', ['add', un])
         .then(function(res) {
@@ -419,12 +420,14 @@ _addRpcdUserForm: function(section, table) {
           return self._save();
         })
         .then(function() {
+          ui.hideModal();
           section.removeChild(form);
           var newTable = self._buildRpcdUsersTable();
           table.parentNode.replaceChild(newTable, table);
         })
         .catch(function(e) {
           adding = false;
+          ui.hideModal();
           errEl.textContent = String(e);
         });
     } }, 'Add'),
@@ -594,7 +597,7 @@ _addSwitchForm: function(container) {
   var nIn = E('input', { type:'text', class:'cbi-input-text', placeholder:'Display Name', style:'width:100%' });
   var userIn = self._sel(self._rpcdUsers(), '');
   var subSel = self._sel(self._subnets(), '');
-  var devSel = self._sel(self._devicesInSubnet(''), '', 0);
+  var devSel = self._sel(self._devicesInSubnet(''), '');
   var wanSel = self._sel(self._ifaces(), '');
   var vpnSel = self._sel(self._ifaces(), '');
   subSel.addEventListener('change', function() {

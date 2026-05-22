@@ -13,7 +13,7 @@ return view.extend({
     return Promise.all([
       uci.load('vpn_toggle'),
       uci.load('pbr'),
-          rpc.declare({ object: 'session', method: 'get', params: ['keys'], expect: { values: {} } })(['username']).catch(function(){ return null; })
+      rpc.declare({ object: 'session', method: 'get', params: ['keys'], expect: { values: {} } })(['username']).catch(function(){ return null; })
     ]);
   },
 
@@ -88,12 +88,14 @@ return view.extend({
     var self = this;
     btn.disabled = true;
     btn.textContent = 'Switching\u2026';
+    ui.showModal(null, E('p', { 'class': 'spinning' }, 'Applying network policies and restarting PBR...'));
 
     var rule = sw.pbr_rule;
     if (!rule) {
       ui.addNotification(null, E('p', {}, 'Switch has no PBR rule configured.'));
       btn.disabled = false;
       btn.textContent = 'Error';
+      ui.hideModal();
       return;
     }
 
@@ -124,10 +126,12 @@ return view.extend({
       .then(function() { return self.load(); })
       .then(function(newData) { return self.render(newData); })
       .then(function(newPage) {
+        ui.hideModal();
         var old = btn.closest('.cbi-map');
         if (old && old.parentNode) old.parentNode.replaceChild(newPage, old);
       })
       .catch(function(err) {
+        ui.hideModal();
         ui.addNotification(null, E('p', {}, 'Toggle failed: ' + String(err)));
         btn.disabled = false;
         btn.textContent = 'Error \u2013 retry';
