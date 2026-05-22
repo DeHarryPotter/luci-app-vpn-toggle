@@ -38,7 +38,7 @@ _ifaces: function() {
 },
 
 _subnets: function() {
-  var r = [{ v:'', l:'-- select subnet --' }];
+  var r = [{ v:'', l:_('-- select subnet --') }];
   uci.sections('network', 'interface', function(s) {
     var ip = s.ipaddr || (Array.isArray(s.ipaddrs) && s.ipaddrs[0]);
     if (ip && ip.indexOf('/') === -1) { // Basic IPv4 check
@@ -51,7 +51,7 @@ _subnets: function() {
 },
 
 _devices: function(arp, dhcp) {
-  var r = [{ v:'', l:'-- entire subnet --' }];
+  var r = [{ v:'', l:_('-- entire subnet --') }];
   var seen = {};
   // Build hostname lookup from DHCP leases (format: timestamp MAC IP hostname)
   var dhcpInfo = {};
@@ -231,7 +231,7 @@ _deviceLabel: function(ip) {
 },
 
 _rpcdUsers: function() {
-  var r = [{ v:'', l:'\u2014 all users \u2014' }];
+  var r = [{ v:'', l:_('\u2014 all users \u2014') }];
   uci.sections('rpcd', 'login', function(s) {
     var readList = s.read || [];
     if (!Array.isArray(readList)) readList = [readList];
@@ -265,34 +265,34 @@ render: function(data) {
   self._arp  = data[5] || '';
 
   var page = E('div', { class:'cbi-map' });
-  page.appendChild(E('h2', {}, 'VPN Toggle Settings'));
+  page.appendChild(E('h2', {}, _('VPN Toggle Settings')));
 
   if (!isAdmin) {
     page.appendChild(E('p', { style:'color:#f87171;margin-top:1em' },
-      'Settings can only be modified by the admin (root) user.'));
+      _('Settings can only be modified by the admin (root) user.')));
     return page;
   }
 
   /* Users */
   var uSec = E('div', { class:'cbi-section' });
-  uSec.appendChild(E('h3', {}, 'VPN Toggle Users'));
+  uSec.appendChild(E('h3', {}, _('VPN Toggle Users')));
   uSec.appendChild(E('p', { class:'cbi-section-descr' },
-    'Users who can access the VPN Toggle page. Passwords are stored via the system shadow database (same as the main router login).'));
+    _('Users who can access the VPN Toggle page. Passwords are stored via the system shadow database (same as the main router login).')));
 
   var uTable = self._buildRpcdUsersTable();
   uSec.appendChild(uTable);
   uSec.appendChild(E('br'));
   uSec.appendChild(E('button', { class:'cbi-button cbi-button-add', click: function() {
     self._addRpcdUserForm(uSec, uTable);
-  } }, '+ Add User'));
+  } }, _('+ Add User')));
   page.appendChild(uSec);
 
   page.appendChild(E('hr', { style:'margin:16px 0;border-color:#334155' }));
 
   /* Switches */
   var swSec = E('div', { class:'cbi-section' });
-  swSec.appendChild(E('h3', {}, 'Switch Configurations'));
-  swSec.appendChild(E('p', { class:'cbi-section-descr' }, 'PBR policies are created automatically on save.'));
+  swSec.appendChild(E('h3', {}, _('Switch Configurations')));
+  swSec.appendChild(E('p', { class:'cbi-section-descr' }, _('PBR policies are created automatically on save.')));
 
   var swGrid = E('div', { id:'sw-grid' });
   self._renderSwitches(swGrid);
@@ -301,7 +301,7 @@ render: function(data) {
   swSec.appendChild(E('br'));
   swSec.appendChild(E('button', { class:'cbi-button cbi-button-add', click: function() {
     self._addSwitchForm(swGrid);
-  } }, '+ Add Switch'));
+  } }, _('+ Add Switch')));
 
   page.appendChild(swSec);
   return page;
@@ -313,8 +313,8 @@ _buildRpcdUsersTable: function() {
   var self = this;
   var t = E('table', { class:'table cbi-section-table', style:'width:100%' });
   t.appendChild(E('tr', { class:'tr table-titles' }, [
-    E('th', { class:'th' }, 'Username'),
-    E('th', { class:'th', style:'width:120px' }, 'Actions')
+    E('th', { class:'th' }, _('Username')),
+    E('th', { class:'th', style:'width:120px' }, _('Actions'))
   ]));
   var found = false;
   uci.sections('rpcd', 'login', function(s) {
@@ -326,7 +326,7 @@ _buildRpcdUsersTable: function() {
   });
   if (!found) {
     t.appendChild(E('tr', { class:'tr' }, [
-      E('td', { class:'td', colspan:'2', style:'color:#888' }, 'No VPN toggle users yet.')
+      E('td', { class:'td', colspan:'2', style:'color:#888' }, _('No VPN toggle users yet.'))
     ]));
   }
   return t;
@@ -340,9 +340,9 @@ _rpcdUserRow: function(table, s) {
   row.appendChild(E('td', { class:'td' }, [
     E('button', { class:'cbi-button cbi-button-remove', click: function(ev) {
       var btn = ev.currentTarget || ev.target;
-      if (btn.textContent !== 'Sure?') {
-        btn.textContent = 'Sure?';
-        btn._delTimer = setTimeout(function() { btn.textContent = 'Delete'; }, 3000);
+      if (btn.textContent !== _('Sure?')) {
+        btn.textContent = _('Sure?');
+        btn._delTimer = setTimeout(function() { btn.textContent = _('Delete'); }, 3000);
         return;
       }
       clearTimeout(btn._delTimer);
@@ -358,16 +358,16 @@ _rpcdUserRow: function(table, s) {
           tbody.removeChild(row);
           if (!tbody.querySelector('tr.tr:not(.table-titles)')) {
             tbody.appendChild(E('tr', { class:'tr' }, [
-              E('td', { class:'td', colspan:'2', style:'color:#888' }, 'No VPN toggle users yet.')
+              E('td', { class:'td', colspan:'2', style:'color:#888' }, _('No VPN toggle users yet.'))
             ]));
           }
         })
         .catch(function(e) {
           btn.disabled = false;
-          btn.textContent = 'Delete';
-          ui.addNotification(null, E('p', {}, 'Delete failed: ' + String(e)));
+          btn.textContent = _('Delete');
+          ui.addNotification(null, E('p', {}, _('Delete failed: %s').format(String(e))));
         });
-    } }, 'Delete')
+    } }, _('Delete'))
   ]));
   return row;
 },
@@ -378,9 +378,9 @@ _addRpcdUserForm: function(section, table) {
   var adding = false;
 
   var uIn = E('input', { type:'text', class:'cbi-input-text',
-    placeholder:'Username (a-z, 0-9, _)', style:'width:160px' });
+    placeholder:_('Username (a-z, 0-9, _)'), style:'width:160px' });
   var pIn = E('input', { type:'password', class:'cbi-input-text',
-    placeholder:'Password', style:'width:160px' });
+    placeholder:_('Password'), style:'width:160px' });
   var errEl = E('span', { style:'color:#f87171;font-size:.85rem;margin-left:6px' }, '');
 
   var form = E('div', { id:'add-rpcd-user-form',
@@ -390,13 +390,13 @@ _addRpcdUserForm: function(section, table) {
       if (adding) return;
       var un = uIn.value.trim();
       var pw = pIn.value;
-      if (!un || !pw) { errEl.textContent = 'Username and password are required.'; return; }
+      if (!un || !pw) { errEl.textContent = _('Username and password are required.'); return; }
       if (!/^[a-zA-Z][a-zA-Z0-9_]{0,31}$/.test(un)) {
-        errEl.textContent = 'Must start with a letter; only letters, digits, underscore (max 32).';
+        errEl.textContent = _('Must start with a letter; only letters, digits, underscore (max 32).');
         return;
       }
       adding = true;
-      ui.showModal(null, E('p', { class: 'spinning' }, 'Creating system user and setting permissions...'));
+      ui.showModal(null, E('p', { class: 'spinning' }, _('Creating system user and setting permissions...')));
       // Step 1: create unix user entry (passwd + locked shadow row)
       fs.exec('/usr/share/vpn-toggle/user-manager', ['add', un])
         .then(function(res) {
@@ -408,7 +408,7 @@ _addRpcdUserForm: function(section, table) {
         })
         .then(function(res) {
           if (!res || res.result === false)
-            throw new Error('Password could not be set — check the username.');
+            throw new Error(_('Password could not be set \u2014 check the username.'));
           // Step 3: add rpcd login section referencing unix shadow ($p$ prefix)
           // luci-base            = required for the LuCI UI framework to function
           // luci-app-vpn-toggle  = grants access to the Toggle page (also first landing page)
@@ -430,8 +430,8 @@ _addRpcdUserForm: function(section, table) {
           ui.hideModal();
           errEl.textContent = String(e);
         });
-    } }, 'Add'),
-    E('button', { class:'cbi-button', click: function() { section.removeChild(form); } }, 'Cancel'),
+    } }, _('Add')),
+    E('button', { class:'cbi-button', click: function() { section.removeChild(form); } }, _('Cancel')),
     errEl
   ]);
   section.appendChild(form);
@@ -447,17 +447,17 @@ _renderSwitches: function(container) {
 
   var t = E('table', { class:'table cbi-section-table', style:'width:100%' });
   t.appendChild(E('tr', { class:'tr table-titles' }, [
-    E('th', { class:'th' }, 'Name'),
-    E('th', { class:'th' }, 'Device / Subnet'),
-    E('th', { class:'th' }, 'WAN'),
-    E('th', { class:'th' }, 'VPN'),
-    E('th', { class:'th', style:'width:110px' }, 'Visible to'),
-    E('th', { class:'th', style:'width:64px;text-align:center' }, 'Enabled'),
-    E('th', { class:'th', style:'width:140px' }, 'Actions')
+    E('th', { class:'th' }, _('Name')),
+    E('th', { class:'th' }, _('Device / Subnet')),
+    E('th', { class:'th' }, _('WAN')),
+    E('th', { class:'th' }, _('VPN')),
+    E('th', { class:'th', style:'width:110px' }, _('Visible to')),
+    E('th', { class:'th', style:'width:64px;text-align:center' }, _('Enabled')),
+    E('th', { class:'th', style:'width:140px' }, _('Actions'))
   ]));
 
   if (!list.length) {
-    t.appendChild(E('tr', { class:'tr' }, [ E('td', { class:'td', colspan:'7', style:'color:#888' }, 'No switches configured.') ]));
+    t.appendChild(E('tr', { class:'tr' }, [ E('td', { class:'td', colspan:'7', style:'color:#888' }, _('No switches configured.')) ]));
   } else {
     list.forEach(function(sw) { t.appendChild(self._switchRow(t, sw, container)); });
   }
@@ -469,7 +469,7 @@ _switchRow: function(table, sw, container) {
   var curIf = sw.pbr_rule ? (uci.get('pbr', sw.pbr_rule, 'interface')||'') : '';
   var isVpn = curIf !== '' && curIf === sw.vpn_if;
 
-  var chk = E('input', { type:'checkbox', title:'Enable on toggle page' });
+  var chk = E('input', { type:'checkbox', title:_('Enable on toggle page') });
   chk.checked = sw.enabled !== '0';
   chk.addEventListener('change', function() {
     uci.set('vpn_toggle', sw['.name'], 'enabled', chk.checked ? '1' : '0');
@@ -486,12 +486,12 @@ _switchRow: function(table, sw, container) {
   row.appendChild(E('td', { class:'td' }, [
     E('button', { class:'cbi-button cbi-button-edit', style:'margin-right:4px', click: function() {
       self._editSwitchInline(table, sw['.name'], row, container);
-    } }, 'Edit'),
+    } }, _('Edit')),
     E('button', { class:'cbi-button cbi-button-remove', click: function(ev) {
       var btn = ev.currentTarget || ev.target;
-      if (btn.textContent !== 'Sure?') {
-        btn.textContent = 'Sure?';
-        btn._delTimer = setTimeout(function() { btn.textContent = 'Delete'; }, 3000);
+      if (btn.textContent !== _('Sure?')) {
+        btn.textContent = _('Sure?');
+        btn._delTimer = setTimeout(function() { btn.textContent = _('Delete'); }, 3000);
         return;
       }
       clearTimeout(btn._delTimer);
@@ -506,8 +506,8 @@ _switchRow: function(table, sw, container) {
         .then(function() { return callUciApply(null, false); })
         .then(function() {
           self._renderSwitches(container);
-        }).catch(function() { btn.disabled = false; btn.textContent = 'Delete'; });
-    } }, 'Delete')
+        }).catch(function() { btn.disabled = false; btn.textContent = _('Delete'); });
+    } }, _('Delete'))
   ]));
   return row;
 },
@@ -527,7 +527,7 @@ _editSwitchInline: function(table, secName, row, container) {
     user:    uci.get('vpn_toggle', secName, 'user')||''
   };
 
-  var nIn = E('input', { type:'text', class:'cbi-input-text', value:cur.name, placeholder:'Name', style:'width:100%' });
+  var nIn = E('input', { type:'text', class:'cbi-input-text', value:cur.name, placeholder:_('Name'), style:'width:100%' });
   var userIn = self._sel(self._rpcdUsers(), cur.user);
   var subSel = self._sel(self._subnets(), cur.subnet);
   var devSel = self._sel(self._devicesInSubnet(cur.subnet), cur.device);
@@ -543,12 +543,12 @@ _editSwitchInline: function(table, secName, row, container) {
   var editRow = E('tr', { id: existingId, class:'tr', style:'background:rgba(99,102,241,.07)' }, [
     E('td', { class:'td', colspan:'7' }, [
       E('div', { style:'display:flex;flex-direction:column;gap:8px;padding:10px' }, [
-        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'Display Name'), E('div', {}, nIn)]),
-        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'Visible to'), E('div', {}, userIn)]),
-        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'Subnet'), E('div', {}, subSel)]),
-        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'Device (opt.)'), E('div', {}, devSel)]),
-        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'WAN'), E('div', {}, wanSel)]),
-        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'VPN'), E('div', {}, vpnSel)])
+        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('Display Name')), E('div', {}, nIn)]),
+        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('Visible to')), E('div', {}, userIn)]),
+        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('Subnet')), E('div', {}, subSel)]),
+        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('Device (opt.)')), E('div', {}, devSel)]),
+        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('WAN')), E('div', {}, wanSel)]),
+        E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('VPN')), E('div', {}, vpnSel)])
       ]),
       E('div', { style:'padding:0 10px 10px;display:flex;gap:8px' }, [
         E('button', { class:'cbi-button cbi-button-save', click: function() {
@@ -581,8 +581,8 @@ _editSwitchInline: function(table, secName, row, container) {
               editRow.parentNode.removeChild(editRow);
               self._renderSwitches(container);
             });
-        } }, 'Save'),
-        E('button', { class:'cbi-button', click: function() { editRow.parentNode.removeChild(editRow); } }, 'Cancel')
+        } }, _('Save')),
+        E('button', { class:'cbi-button', click: function() { editRow.parentNode.removeChild(editRow); } }, _('Cancel'))
       ])
     ])
   ]);
@@ -594,7 +594,7 @@ _addSwitchForm: function(container) {
   if (container.querySelector('#add-sw-form')) return;
 
   var adding = false;
-  var nIn = E('input', { type:'text', class:'cbi-input-text', placeholder:'Display Name', style:'width:100%' });
+  var nIn = E('input', { type:'text', class:'cbi-input-text', placeholder:_('Display Name'), style:'width:100%' });
   var userIn = self._sel(self._rpcdUsers(), '');
   var subSel = self._sel(self._subnets(), '');
   var devSel = self._sel(self._devicesInSubnet(''), '');
@@ -608,14 +608,14 @@ _addSwitchForm: function(container) {
   });
 
   var form = E('div', { id:'add-sw-form', style:'margin-top:12px;padding:14px;border:1px solid #334155;border-radius:8px' }, [
-    E('h4', { style:'margin:0 0 10px' }, 'New Switch'),
+    E('h4', { style:'margin:0 0 10px' }, _('New Switch')),
     E('div', { style:'display:flex;flex-direction:column;gap:8px;margin-bottom:10px' }, [
-      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'Display Name'), E('div', {}, nIn)]),
-      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'Visible to'), E('div', {}, userIn)]),
-      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'Subnet'), E('div', {}, subSel)]),
-      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'Device (opt.)'), E('div', {}, devSel)]),
-      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'WAN'), E('div', {}, wanSel)]),
-      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, 'VPN'), E('div', {}, vpnSel)])
+      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('Display Name')), E('div', {}, nIn)]),
+      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('Visible to')), E('div', {}, userIn)]),
+      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('Subnet')), E('div', {}, subSel)]),
+      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('Device (opt.)')), E('div', {}, devSel)]),
+      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('WAN')), E('div', {}, wanSel)]),
+      E('div', {}, [E('div', { style:'font-size:.8rem;color:#94a3b8;margin-bottom:2px' }, _('VPN')), E('div', {}, vpnSel)])
     ]),
     E('div', { style:'display:flex;gap:8px' }, [
       E('button', { class:'cbi-button cbi-button-save', click: function() {
@@ -646,8 +646,8 @@ _addSwitchForm: function(container) {
           .then(function() {
             self._renderSwitches(container);
           }).catch(function() { adding = false; });
-      } }, 'Add Switch'),
-      E('button', { class:'cbi-button', click: function() { container.removeChild(form); } }, 'Cancel')
+      } }, _('Add Switch')),
+      E('button', { class:'cbi-button', click: function() { container.removeChild(form); } }, _('Cancel'))
     ])
   ]);
   container.appendChild(form);

@@ -29,11 +29,11 @@ return view.extend({
     });
 
     var page = E('div', { 'class': 'cbi-map' });
-    page.appendChild(E('h2', {}, 'VPN Toggle'));
+    page.appendChild(E('h2', {}, _('VPN Toggle')));
 
     if (!enabled.length) {
       page.appendChild(E('p', { style: 'color:#888;margin-top:1em' },
-        'No active switches. Configure them in Settings.'));
+        _('No active switches. Configure them in Settings.')));
       return page;
     }
 
@@ -60,17 +60,17 @@ return view.extend({
              'font-size:.75rem;font-weight:600;margin-top:6px;' +
              (isVpn ? 'background:#083344;color:#67e8f9'
                     : 'background:#1e3a5f;color:#93c5fd')
-    }, isVpn ? 'VPN' : 'Direct');
+    }, isVpn ? _('VPN') : _('Direct'));
 
     var via = E('div', {
       style: 'font-size:.75rem;color:#94a3b8;margin-top:4px'
-    }, 'via ' + (curIf || '—'));
+    }, _('via %s').format(curIf || '—'));
 
     var btn = E('button', {
       'class': 'cbi-button',
       style: 'margin-top:10px;width:100%',
       click: function() { self._doToggle(sw, btn); }
-    }, isVpn ? '\u21E6 Switch to Direct' : '\u21E8 Switch to VPN');
+    }, isVpn ? '\u21E6 ' + _('Switch to Direct') : '\u21E8 ' + _('Switch to VPN'));
 
     return E('div', {
       style: 'background:var(--background-color-medium,#1e293b);' +
@@ -87,14 +87,14 @@ return view.extend({
   _doToggle: function(sw, btn) {
     var self = this;
     btn.disabled = true;
-    btn.textContent = 'Switching\u2026';
-    ui.showModal(null, E('p', { 'class': 'spinning' }, 'Applying network policies and restarting PBR...'));
+    btn.textContent = _('Switching\u2026');
+    ui.showModal(null, E('p', { 'class': 'spinning' }, _('Applying network policies and restarting PBR...')));
 
     var rule = sw.pbr_rule;
     if (!rule) {
-      ui.addNotification(null, E('p', {}, 'Switch has no PBR rule configured.'));
+      ui.addNotification(null, E('p', {}, _('Switch has no PBR rule configured.')));
       btn.disabled = false;
-      btn.textContent = 'Error';
+      btn.textContent = _('Error');
       ui.hideModal();
       return;
     }
@@ -132,9 +132,9 @@ return view.extend({
       })
       .catch(function(err) {
         ui.hideModal();
-        ui.addNotification(null, E('p', {}, 'Toggle failed: ' + String(err)));
+        ui.addNotification(null, E('p', {}, _('Toggle failed: %s').format(String(err))));
         btn.disabled = false;
-        btn.textContent = 'Error \u2013 retry';
+        btn.textContent = _('Error \u2013 retry');
       });
   },
 
